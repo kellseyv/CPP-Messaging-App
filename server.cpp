@@ -2,10 +2,13 @@
 #include <cstdlib>
 #include <iostream>
 #include <netinet/in.h>
+#include <ostream>
+#include <string>
 #include <sys/socket.h>
 #include <unistd.h>
 
 constexpr int PORT = 8080;
+constexpr int BUFFER_SIZE = 1024;
 
 int main() {
     int listen_fd;
@@ -58,6 +61,49 @@ int main() {
     }
 
     std::cout << "Client connected!" << std::endl;
+
+    char buffer[BUFFER_SIZE];
+
+    ssize_t bytes_received = recv(
+        connection_fd,
+        buffer,
+        BUFFER_SIZE,
+        0
+        );
+
+if (bytes_received == -1) {
+    perror("Error receiving message on server");
+    close(connection_fd);
+    close(listen_fd);
+    exit(EXIT_FAILURE);
+} else if (bytes_received == 0) {
+    std::cout << "Client disconnected" << std::endl;
+} else {
+    std::cout << "Client message: ";
+    std::cout.write(buffer, bytes_received);
+    std::cout << std::endl;
+
+    std::string server_message;
+
+    std::cout << "Enter a reply: ";
+    std::getline(std::cin, server_message);
+
+    server_message += '\n';
+
+    ssize_t bytes_sent = send(
+        connection_fd,
+        server_message.data(),
+        server_message.size(),
+        0
+    );
+
+    if (bytes_sent == -1) {
+        perror("Error sending reply from server");
+        close(connection_fd);
+        close(listen_fd);
+        exit(EXIT_FAILURE);
+    }
+}
 
     close(connection_fd);
     close(listen_fd);
