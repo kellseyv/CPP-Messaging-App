@@ -25,7 +25,7 @@ int main() {
 
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(PORT);
-    server_address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
 
     if (bind(
             listen_fd,
